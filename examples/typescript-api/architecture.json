@@ -1,0 +1,89 @@
+{
+  "version": "1.0",
+  "layers": {
+    "enabled": true,
+    "order": ["types", "config", "repo", "service", "runtime"],
+    "direction": "forward-only",
+    "descriptions": {
+      "types":   "Pure type definitions, interfaces, enums. Zero imports from other layers.",
+      "config":  "Configuration schemas, defaults, environment parsing. May import types.",
+      "repo":    "Prisma queries, data access abstractions. May import types, config.",
+      "service": "Business logic, orchestration. May import types, config, repo.",
+      "runtime": "Express route handlers, middleware. May import all above."
+    },
+    "providers": {
+      "description": "Cross-cutting concerns (auth, telemetry, logging) enter via providers.",
+      "path_pattern": "src/*/providers.ts",
+      "allowed_consumers": ["service", "runtime"],
+      "cross_cutting_modules": ["auth", "telemetry", "logging"]
+    }
+  },
+  "domains": {
+    "users": {
+      "path": "src/users",
+      "description": "User registration, authentication, profile management",
+      "layer_structure": {
+        "types":   "src/users/types.ts",
+        "config":  "src/users/config.ts",
+        "repo":    "src/users/repo.ts",
+        "service": "src/users/service.ts",
+        "runtime": "src/users/runtime.ts"
+      },
+      "providers": "src/users/providers.ts",
+      "allowed_domain_dependencies": [],
+      "public_api": "src/users/index.ts",
+      "test_directory": "tests/users"
+    },
+    "billing": {
+      "path": "src/billing",
+      "description": "Invoice generation, payment processing, Stripe integration",
+      "layer_structure": {
+        "types":   "src/billing/types.ts",
+        "config":  "src/billing/config.ts",
+        "repo":    "src/billing/repo.ts",
+        "service": "src/billing/service.ts",
+        "runtime": "src/billing/runtime.ts"
+      },
+      "providers": "src/billing/providers.ts",
+      "allowed_domain_dependencies": ["users"],
+      "public_api": "src/billing/index.ts",
+      "test_directory": "tests/billing"
+    },
+    "orders": {
+      "path": "src/orders",
+      "description": "Order creation, fulfillment, status tracking",
+      "layer_structure": {
+        "types":   "src/orders/types.ts",
+        "config":  "src/orders/config.ts",
+        "repo":    "src/orders/repo.ts",
+        "service": "src/orders/service.ts",
+        "runtime": "src/orders/runtime.ts"
+      },
+      "providers": "src/orders/providers.ts",
+      "allowed_domain_dependencies": ["users", "billing"],
+      "public_api": "src/orders/index.ts",
+      "test_directory": "tests/orders"
+    }
+  },
+  "boundary_validation": {
+    "enabled": true,
+    "boundary_layer": "runtime",
+    "target_layer": "service",
+    "rules": {
+      "typescript": {
+        "strategy": "runtime_parsing",
+        "validation_imports": ["zod"],
+        "parse_patterns": ["\\.parse\\(", "\\.safeParse\\(", "\\.parseAsync\\("],
+        "raw_data_patterns": ["req\\.body(?!\\w)", "req\\.query(?!\\w)", "req\\.params(?!\\w)"],
+        "schema_layer": "types"
+      }
+    }
+  },
+  "global_rules": {
+    "no_circular_dependencies": true,
+    "layer_enforcement": "strict",
+    "cross_domain_via_public_api_only": true,
+    "test_file_pattern": "**/*.test.ts|**/*.spec.ts",
+    "max_module_depth": 3
+  }
+}

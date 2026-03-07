@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# pre-push hook: Run thorough checks before allowing push.
+# Runs: verify-tests-exist.sh, lint-architecture.sh
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+FAILED=0
+
+echo "[HARNESS] Running pre-push checks..."
+
+# Verify tests exist for changed files
+if [[ -f "$REPO_ROOT/scripts/verify-tests-exist.sh" ]]; then
+  echo ""
+  echo "--- Checking test coverage ---"
+  if ! "$REPO_ROOT/scripts/verify-tests-exist.sh"; then
+    FAILED=1
+  fi
+else
+  echo "[HARNESS] Warning: verify-tests-exist.sh not found. Skipping test verification."
+fi
+
+# Check architecture boundaries
+if [[ -f "$REPO_ROOT/scripts/lint-architecture.sh" ]]; then
+  echo ""
+  echo "--- Checking architecture boundaries ---"
+  if ! "$REPO_ROOT/scripts/lint-architecture.sh"; then
+    FAILED=1
+  fi
+else
+  echo "[HARNESS] Warning: lint-architecture.sh not found. Skipping architecture check."
+fi
+
+# Check boundary validation
+if [[ -f "$REPO_ROOT/scripts/lint-boundary-validation.sh" ]]; then
+  echo ""
+  echo "--- Checking boundary validation ---"
+  if ! "$REPO_ROOT/scripts/lint-boundary-validation.sh"; then
+    FAILED=1
+  fi
+else
+  echo "[HARNESS] Warning: lint-boundary-validation.sh not found. Skipping boundary validation."
+fi
+
+if [[ $FAILED -ne 0 ]]; then
+  echo ""
+  echo "[HARNESS] Pre-push checks failed. Fix the issues above before pushing."
+  echo "  To skip this check (not recommended): git push --no-verify"
+  exit 1
+fi
+
+echo ""
+echo "[HARNESS] Pre-push checks passed."

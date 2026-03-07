@@ -1,0 +1,50 @@
+# Agent local overrides (git-ignored by design)
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+out/
+target/
+*.o
+*.so
+*.dylib
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Test & coverage
+coverage/
+.nyc_output/
+htmlcov/
+.pytest_cache/
+.coverage
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+.Spotlight-V100
+.Trashes

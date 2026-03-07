@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "layers": {
+    "enabled": true,
+    "order": ["types", "config", "repo", "service", "runtime", "ui"],
+    "direction": "forward-only",
+    "descriptions": {
+      "types":   "Pure type definitions, interfaces, enums. Zero imports from other layers.",
+      "config":  "Configuration schemas, defaults, environment parsing. May import types.",
+      "repo":    "Data access, storage abstractions, queries. May import types, config.",
+      "service": "Business logic, orchestration. May import types, config, repo.",
+      "runtime": "HTTP handlers, CLI entry points, job runners. May import all above.",
+      "ui":      "UI components, views, client code. May import all above."
+    },
+    "providers": {
+      "description": "Cross-cutting concerns MUST enter via explicit Providers interface.",
+      "path_pattern": "src/{{DOMAIN}}/providers.*",
+      "allowed_consumers": ["service", "runtime", "ui"],
+      "cross_cutting_modules": ["auth", "telemetry", "feature-flags", "logging"]
+    }
+  },
+  "domains": {
+    "{{DOMAIN_NAME}}": {
+      "path": "src/{{DOMAIN_NAME}}",
+      "description": "{{DOMAIN_DESCRIPTION}}",
+      "layer_structure": {
+        "types":   "src/{{DOMAIN_NAME}}/types.*",
+        "config":  "src/{{DOMAIN_NAME}}/config.*",
+        "repo":    "src/{{DOMAIN_NAME}}/repo.*",
+        "service": "src/{{DOMAIN_NAME}}/service.*",
+        "runtime": "src/{{DOMAIN_NAME}}/runtime.*",
+        "ui":      "src/{{DOMAIN_NAME}}/ui/**"
+      },
+      "providers": "src/{{DOMAIN_NAME}}/providers.*",
+      "allowed_domain_dependencies": [],
+      "public_api": "src/{{DOMAIN_NAME}}/index.*",
+      "test_directory": "tests/{{DOMAIN_NAME}}"
+    }
+  },
+  "boundary_validation": {
+    "enabled": true,
+    "boundary_layer": "runtime",
+    "target_layer": "service",
+    "rules": {
+      "typescript": {
+        "strategy": "runtime_parsing",
+        "validation_imports": ["zod", "io-ts", "yup", "valibot", "arktype", "typia", "joi", "superstruct", "class-validator"],
+        "parse_patterns": ["\\.parse\\(", "\\.safeParse\\(", "\\.parseAsync\\(", "\\.validate\\(", "\\.validateSync\\(", "\\.check\\(", "\\.decode\\("],
+        "raw_data_patterns": ["req\\.body(?!\\w)", "req\\.query(?!\\w)", "req\\.params(?!\\w)", "request\\.body(?!\\w)", "ctx\\.body(?!\\w)"],
+        "schema_layer": "types"
+      },
+      "python": {
+        "strategy": "runtime_parsing",
+        "validation_imports": ["pydantic", "marshmallow", "cerberus", "voluptuous", "attrs", "cattrs", "typeguard", "beartype"],
+        "parse_patterns": ["BaseModel", "model_validate", "TypeAdapter", "\\.parse_obj\\(", "\\.load\\(", "@validate_call"],
+        "raw_data_patterns": ["request\\.json(?!\\w)", "request\\.form(?!\\w)", "request\\.data(?!\\w)", "await request\\.json"],
+        "schema_layer": "types"
+      },
+      "java": {
+        "strategy": "static_typed",
+        "annotation_imports": ["jakarta.validation", "javax.validation"],
+        "annotation_patterns": ["@Valid", "@NotNull", "@NotBlank", "@Size", "@Min", "@Max", "@Pattern", "@Email", "@Positive"],
+        "unsafe_types": ["Map<String,\\s*Object>", "JsonNode", "ObjectNode", "\\bObject\\b(?!\\.)"],
+        "framework_patterns": ["@RequestBody\\s+@Valid", "@RequestBody.*@Valid"],
+        "schema_layer": "types"
+      },
+      "kotlin": {
+        "strategy": "static_typed",
+        "annotation_imports": ["jakarta.validation", "javax.validation"],
+        "annotation_patterns": ["@Valid", "@NotNull", "@NotBlank", "@Size", "@field:NotNull", "@field:Size"],
+        "unsafe_types": ["Map<String,\\s*Any>", "JsonNode", "\\bAny\\b"],
+        "framework_patterns": ["@RequestBody\\s+@Valid"],
+        "schema_layer": "types"
+      },
+      "go": {
+        "strategy": "explicit_unmarshal",
+        "validation_imports": ["validator", "ozzo-validation"],
+        "parse_patterns": ["json\\.Unmarshal", "json\\.NewDecoder", "\\.Decode\\(", "\\.Bind\\(", "\\.ShouldBind", "\\.BodyParser\\("],
+        "unsafe_types": ["interface\\{\\}", "map\\[string\\]interface", "\\bany\\b"],
+        "schema_layer": "types"
+      },
+      "rust": {
+        "strategy": "explicit_unmarshal",
+        "validation_imports": ["validator", "garde"],
+        "parse_patterns": ["serde::Deserialize", "Json<", "web::Json<", "serde_json::from"],
+        "unsafe_types": ["serde_json::Value", "\\bValue\\b"],
+        "schema_layer": "types"
+      }
+    }
+  },
+  "global_rules": {
+    "no_circular_dependencies": true,
+    "layer_enforcement": "strict",
+    "cross_domain_via_public_api_only": true,
+    "test_file_pattern": "**/*.test.*|**/*.spec.*|**/test_*.*",
+    "max_module_depth": 3
+  }
+}

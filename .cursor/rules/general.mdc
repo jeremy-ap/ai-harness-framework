@@ -1,0 +1,52 @@
+---
+name: "General project rules"
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# {{PROJECT_NAME}} — General Rules
+
+## Project Overview
+{{PROJECT_NAME}} is {{PROJECT_SUMMARY}}.
+
+## Language and Runtime
+{{LANGUAGE_VERSION}}
+
+## Architecture
+This project uses a layered architecture with strict dependency direction (inward only):
+
+1. Presentation/API Layer — Handles HTTP requests, CLI commands, or UI. Depends on Service only.
+2. Service/Business Logic Layer — Core business rules and orchestration. Depends on Data only.
+3. Data/Repository Layer — Persistence and external data access. Depends on Shared only.
+4. Shared/Core — Types, utilities, constants. No dependencies on other layers.
+
+Refer to `architecture.json` in the project root for machine-readable boundary definitions.
+
+## Code Style
+- Use meaningful, descriptive names for all identifiers.
+- Keep functions small and single-purpose.
+- Prefer composition over inheritance.
+- Handle errors at boundaries where you have context to act.
+- Use typed/structured errors, not raw strings.
+- No `any` types (TypeScript) or untyped parameters (Python).
+
+## Key Commands
+- Build: `{{BUILD_COMMAND}}`
+- Test all: `{{TEST_ALL_COMMAND}}`
+- Test single: `{{TEST_SINGLE_COMMAND}}`
+- Lint: `{{LINT_COMMAND}}`
+- Architecture check: `./scripts/lint-architecture.sh`
+- Harness check: `./scripts/harness-doctor.sh`
+
+## What to Avoid
+- Do not modify generated files directly.
+- Do not bypass linting or type checks.
+- Do not add dependencies without justification.
+- Do not commit secrets, tokens, or credentials.
+- Do not create circular dependencies between layers.
+- Do not skip architectural layers (e.g., Presentation calling Data directly).
+
+## Git Conventions
+- Commit messages: `type(scope): description` (conventional commits)
+- Types: feat, fix, refactor, test, docs, chore, ci
+- Keep commits atomic.

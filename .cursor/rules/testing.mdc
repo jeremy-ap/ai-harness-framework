@@ -1,0 +1,42 @@
+---
+name: "Testing conventions"
+globs: ["**/*.test.*", "**/*.spec.*", "**/test_*", "**/tests/**"]
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Test File Naming
+- Follow the pattern: `{{TEST_FILE_PATTERN}}`
+- Place tests adjacent to source or in the `tests/` directory, matching existing conventions
+- Mirror source directory structure in `tests/`
+
+## Test Structure
+- Use descriptive names that explain expected behavior
+  - Good: `should return 404 when user is not found`
+  - Bad: `test user`, `it works`
+- Group related tests with describe/context blocks
+- Follow the Arrange-Act-Assert pattern
+
+## Assertions
+- Every test MUST contain meaningful assertions that verify behavior
+- Do not write tests that merely execute code without checking results
+- Use specific matchers (e.g., `toEqual`, `assert_called_with`) over generic ones (e.g., `toBeTruthy`)
+- When testing errors, assert on error type and message content
+- Assert on return values, state changes, and side effects
+
+## Mocking
+- Mock external dependencies: network, database, file system, third-party APIs
+- Do not mock the unit under test itself
+- Keep mocks minimal — only mock what is required for isolation
+- Verify mock interactions when the side effect is the behavior under test
+
+## Coverage
+- New features and bug fixes must include tests
+- Cover happy path, edge cases, and error conditions
+- Do not write tests solely to inflate coverage — each test should verify meaningful behavior
+
+## Running Tests
+- All tests: `{{TEST_ALL_COMMAND}}`
+- Single test: `{{TEST_SINGLE_COMMAND}}`
+- Always run the full test suite before committing

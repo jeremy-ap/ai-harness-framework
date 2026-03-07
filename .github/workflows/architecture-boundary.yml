@@ -1,0 +1,33 @@
+name: Architecture Boundary Check
+
+on:
+  pull_request:
+    branches: ["*"]
+
+permissions:
+  contents: read
+
+jobs:
+  architecture-boundary:
+    name: Enforce Architecture Boundaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq
+        run: |
+          if ! command -v jq &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh scripts/common/*.sh
+
+      - name: Check architecture boundaries
+        run: ./scripts/lint-architecture.sh --ci
+
+      - name: Check boundary validation
+        run: ./scripts/lint-boundary-validation.sh --ci

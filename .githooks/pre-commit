@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# pre-commit hook: Run fast lint checks before allowing commit.
+# Runs: lint-agent-config.sh (validates CLAUDE.md/AGENTS.md structure)
+set -euo pipefail
+
+# Find the repo root
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Check if harness scripts exist
+if [[ ! -f "$REPO_ROOT/scripts/lint-agent-config.sh" ]]; then
+  echo "[HARNESS] Warning: lint-agent-config.sh not found. Skipping pre-commit checks."
+  exit 0
+fi
+
+echo "[HARNESS] Running pre-commit checks..."
+
+# Run agent config lint (fast check)
+if ! "$REPO_ROOT/scripts/lint-agent-config.sh"; then
+  echo ""
+  echo "[HARNESS] Pre-commit checks failed. Fix the issues above before committing."
+  echo "  To skip this check (not recommended): git commit --no-verify"
+  exit 1
+fi
+
+echo "[HARNESS] Pre-commit checks passed."

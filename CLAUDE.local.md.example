@@ -1,0 +1,23 @@
+# CLAUDE.local.md — Personal Overrides (git-ignored)
+#
+# Copy this file to CLAUDE.local.md and customize for your local preferences.
+# This file is listed in .gitignore and should NOT be committed.
+# It is automatically loaded by Claude Code alongside CLAUDE.md.
+
+## Preferred Style
+# Uncomment and adjust as needed:
+# - I prefer verbose explanations when reviewing code
+# - I prefer terse, minimal responses
+# - Always show me the diff before committing
+
+## Personal Shortcuts
+# - My test database runs on port 5433
+# - Use `make dev` instead of `npm run dev` on my machine
+
+## Environment Notes
+# - Local API runs at http://localhost:3000
+# - I use docker-compose for services
+
+## Focus Areas
+# - I'm currently working on the auth module
+# - Skip explanations of the data layer — I wrote it

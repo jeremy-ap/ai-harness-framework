@@ -1,0 +1,50 @@
+---
+name: "Architecture boundary rules"
+globs: ["src/**"]
+alwaysApply: false
+---
+
+# Architecture Boundaries
+
+## Layered Architecture
+This project enforces a strict layered architecture. All source code in `src/` belongs to one of four layers. Dependencies flow inward only — outer layers may depend on inner layers, but never the reverse.
+
+## The Layers
+
+### Layer 1: Presentation / API (outermost)
+- **Location**: `src/presentation/`, `src/api/`, `src/routes/`, `src/controllers/`
+- **Responsibility**: Handles HTTP requests, CLI commands, WebSocket connections, or UI rendering. Translates between external formats and internal service calls.
+- **Allowed dependencies**: Service layer, Shared layer.
+- **Forbidden**: Must NOT import from Data/Repository layer directly.
+
+### Layer 2: Service / Business Logic
+- **Location**: `src/services/`, `src/domain/`, `src/usecases/`
+- **Responsibility**: Contains core business rules, orchestration, validation, and domain logic. This is where the application's value lives.
+- **Allowed dependencies**: Data layer, Shared layer.
+- **Forbidden**: Must NOT import from Presentation layer.
+
+### Layer 3: Data / Repository (innermost application layer)
+- **Location**: `src/data/`, `src/repositories/`, `src/adapters/`
+- **Responsibility**: Manages persistence (database queries, file I/O), external API calls, and data mapping. Encapsulates how data is stored and retrieved.
+- **Allowed dependencies**: Shared layer only.
+- **Forbidden**: Must NOT import from Service or Presentation layers.
+
+### Layer 4: Shared / Core (foundation)
+- **Location**: `src/shared/`, `src/core/`, `src/utils/`, `src/types/`
+- **Responsibility**: Types, interfaces, constants, and pure utility functions used across all layers.
+- **Allowed dependencies**: None (no imports from other project layers).
+
+## Rules Summary
+1. Dependencies flow inward: Presentation -> Service -> Data -> Shared.
+2. Never skip layers (e.g., Presentation must not call Data directly).
+3. Never create reverse dependencies (e.g., Data must not import from Service).
+4. Never create circular dependencies between modules.
+5. Shared/Core must remain dependency-free with respect to other project layers.
+
+## Verification
+Run `./scripts/lint-architecture.sh` to check for boundary violations. The file `architecture.json` in the project root defines these boundaries in machine-readable form for automated enforcement.
+
+## When in Doubt
+- If a piece of code is used by multiple layers, it belongs in Shared.
+- If you need to pass data upward, use return values or callbacks, not imports.
+- If a service needs to trigger a presentation concern (e.g., send a notification), use an event or interface, not a direct import.

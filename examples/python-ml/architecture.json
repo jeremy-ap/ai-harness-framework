@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "stack": "python",
+  "layers": {
+    "enabled": true,
+    "order": ["types", "config", "repo", "service", "runtime"],
+    "direction": "forward-only",
+    "descriptions": {
+      "types":   "Pure type definitions, dataclasses, enums. Zero imports from other layers.",
+      "config":  "Configuration schemas, defaults, environment parsing. May import types.",
+      "repo":    "Data access, storage abstractions, database queries. May import types, config.",
+      "service": "Business logic, orchestration, ML pipelines. May import types, config, repo.",
+      "runtime": "FastAPI routes, CLI commands, job runners. May import all above."
+    },
+    "providers": {
+      "description": "Cross-cutting concerns (auth, telemetry, logging) enter via providers.",
+      "path_pattern": "src/*/providers.py",
+      "allowed_consumers": ["service", "runtime"],
+      "cross_cutting_modules": ["auth", "telemetry", "logging"]
+    }
+  },
+  "domains": {
+    "data_pipeline": {
+      "path": "src/data_pipeline",
+      "description": "Data ingestion, transformation, and feature engineering",
+      "layer_structure": {
+        "types":   "src/data_pipeline/types.py",
+        "config":  "src/data_pipeline/config.py",
+        "repo":    "src/data_pipeline/repo.py",
+        "service": "src/data_pipeline/service.py",
+        "runtime": "src/data_pipeline/runtime.py"
+      },
+      "providers": "src/data_pipeline/providers.py",
+      "allowed_domain_dependencies": [],
+      "public_api": "src/data_pipeline/__init__.py",
+      "test_directory": "tests/data_pipeline"
+    },
+    "models": {
+      "path": "src/models",
+      "description": "Model definitions, training loops, evaluation metrics",
+      "layer_structure": {
+        "types":   "src/models/types.py",
+        "config":  "src/models/config.py",
+        "repo":    "src/models/repo.py",
+        "service": "src/models/service.py",
+        "runtime": "src/models/runtime.py"
+      },
+      "providers": "src/models/providers.py",
+      "allowed_domain_dependencies": ["data_pipeline"],
+      "public_api": "src/models/__init__.py",
+      "test_directory": "tests/models"
+    },
+    "serving": {
+      "path": "src/serving",
+      "description": "Model serving, inference API, prediction endpoints",
+      "layer_structure": {
+        "types":   "src/serving/types.py",
+        "config":  "src/serving/config.py",
+        "repo":    "src/serving/repo.py",
+        "service": "src/serving/service.py",
+        "runtime": "src/serving/runtime.py"
+      },
+      "providers": "src/serving/providers.py",
+      "allowed_domain_dependencies": ["models", "data_pipeline"],
+      "public_api": "src/serving/__init__.py",
+      "test_directory": "tests/serving"
+    }
+  },
+  "boundary_validation": {
+    "enabled": true,
+    "boundary_layer": "runtime",
+    "target_layer": "service",
+    "rules": {
+      "python": {
+        "strategy": "runtime_parsing",
+        "validation_imports": ["pydantic"],
+        "parse_patterns": ["BaseModel", "model_validate", "TypeAdapter"],
+        "raw_data_patterns": ["request\\.json(?!\\w)", "await request\\.json"],
+        "schema_layer": "types"
+      }
+    }
+  },
+  "global_rules": {
+    "no_circular_dependencies": true,
+    "layer_enforcement": "strict",
+    "cross_domain_via_public_api_only": true,
+    "test_file_pattern": "**/test_*.py|**/*_test.py",
+    "max_module_depth": 3
+  }
+}

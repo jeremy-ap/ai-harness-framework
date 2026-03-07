@@ -1,0 +1,12 @@
+{
+  "_comment": "Copy this file to settings.local.json for personal overrides. This file is git-ignored.",
+  "_usage": "Local settings are merged on top of settings.json. You can add extra permissions or override deny rules for your local workflow.",
+  "permissions": {
+    "allow": [
+      "Bash(docker *)",
+      "Bash(make *)",
+      "Write(src/*)"
+    ],
+    "deny": []
+  }
+}

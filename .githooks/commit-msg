@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# commit-msg hook: Validate commit message format.
+# Uses lint-commit-messages.sh to check conventional commits format.
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+COMMIT_MSG_FILE="$1"
+
+# Check if harness scripts exist
+if [[ ! -f "$REPO_ROOT/scripts/lint-commit-messages.sh" ]]; then
+  echo "[HARNESS] Warning: lint-commit-messages.sh not found. Skipping commit message validation."
+  exit 0
+fi
+
+# Validate commit message
+if ! "$REPO_ROOT/scripts/lint-commit-messages.sh" "$COMMIT_MSG_FILE"; then
+  echo ""
+  echo "[HARNESS] Commit message does not match conventional commits format."
+  echo "  Expected: type(scope): description"
+  echo "  Types: feat, fix, docs, style, refactor, test, chore, ci"
+  echo "  Example: feat(billing): add invoice generation endpoint"
+  echo ""
+  echo "  To skip this check (not recommended): git commit --no-verify"
+  exit 1
+fi

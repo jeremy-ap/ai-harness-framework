@@ -1,0 +1,53 @@
+name: Doc Freshness Check
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Every Monday at 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  doc-freshness:
+    name: Check Documentation Freshness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: |
+          if ! command -v jq &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
+      - name: Make scripts executable
+        run: chmod +x scripts/*.sh scripts/common/*.sh
+
+      - name: Run doc freshness check
+        id: docs
+        run: |
+          set +e
+          output=$(./scripts/lint-docs.sh --ci 2>&1)
+          exit_code=$?
+          echo "$output"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          echo "output<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$output" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create issue if stale docs found
+        if: steps.docs.outputs.exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.docs.outputs.output }}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Documentation freshness check failed',
+              body: `## Stale Documentation Detected\n\nThe weekly documentation freshness check found issues:\n\n\`\`\`\n${output}\n\`\`\`\n\nPlease update the affected documentation.\n\n*This issue was automatically created by the doc-freshness workflow.*`,
+              labels: ['documentation', 'automated']
+            });

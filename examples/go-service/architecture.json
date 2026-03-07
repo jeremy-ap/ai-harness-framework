@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "stack": "go",
+  "layers": {
+    "enabled": true,
+    "order": ["types", "config", "repo", "service", "runtime"],
+    "direction": "forward-only",
+    "descriptions": {
+      "types":   "Pure type definitions, interfaces. Zero imports from other layers.",
+      "config":  "Configuration structs, defaults, environment parsing. May import types.",
+      "repo":    "Database queries, storage abstractions. May import types, config.",
+      "service": "Business logic, orchestration. May import types, config, repo.",
+      "runtime": "HTTP handlers, CLI commands, worker loops. May import all above."
+    },
+    "providers": {
+      "description": "Cross-cutting concerns (auth, telemetry, logging) enter via providers.",
+      "path_pattern": "internal/*/providers.go",
+      "allowed_consumers": ["service", "runtime"],
+      "cross_cutting_modules": ["auth", "telemetry", "logging"]
+    }
+  },
+  "domains": {
+    "api": {
+      "path": "internal/api",
+      "description": "HTTP API: job submission, status queries, health checks",
+      "layer_structure": {
+        "types":   "internal/api/types.go",
+        "config":  "internal/api/config.go",
+        "repo":    "internal/api/repo.go",
+        "service": "internal/api/service.go",
+        "runtime": "internal/api/runtime.go"
+      },
+      "providers": "internal/api/providers.go",
+      "allowed_domain_dependencies": ["storage"],
+      "public_api": "internal/api/api.go",
+      "test_directory": "internal/api"
+    },
+    "storage": {
+      "path": "internal/storage",
+      "description": "PostgreSQL persistence, job queue, migrations",
+      "layer_structure": {
+        "types":   "internal/storage/types.go",
+        "config":  "internal/storage/config.go",
+        "repo":    "internal/storage/repo.go",
+        "service": "internal/storage/service.go",
+        "runtime": "internal/storage/runtime.go"
+      },
+      "providers": "internal/storage/providers.go",
+      "allowed_domain_dependencies": [],
+      "public_api": "internal/storage/storage.go",
+      "test_directory": "internal/storage"
+    },
+    "worker": {
+      "path": "internal/worker",
+      "description": "Background job processing, retry logic, dead letter handling",
+      "layer_structure": {
+        "types":   "internal/worker/types.go",
+        "config":  "internal/worker/config.go",
+        "repo":    "internal/worker/repo.go",
+        "service": "internal/worker/service.go",
+        "runtime": "internal/worker/runtime.go"
+      },
+      "providers": "internal/worker/providers.go",
+      "allowed_domain_dependencies": ["storage"],
+      "public_api": "internal/worker/worker.go",
+      "test_directory": "internal/worker"
+    }
+  },
+  "boundary_validation": {
+    "enabled": true,
+    "boundary_layer": "runtime",
+    "target_layer": "service",
+    "rules": {
+      "go": {
+        "strategy": "explicit_unmarshal",
+        "validation_imports": ["validator"],
+        "parse_patterns": ["json\\.Unmarshal", "json\\.NewDecoder", "\\.Decode\\("],
+        "unsafe_types": ["interface\\{\\}", "map\\[string\\]interface", "\\bany\\b"],
+        "schema_layer": "types"
+      }
+    }
+  },
+  "global_rules": {
+    "no_circular_dependencies": true,
+    "layer_enforcement": "strict",
+    "cross_domain_via_public_api_only": true,
+    "test_file_pattern": "**/*_test.go",
+    "max_module_depth": 3
+  }
+}
