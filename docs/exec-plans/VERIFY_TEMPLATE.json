@@ -1,0 +1,24 @@
+{
+  "plan": "NNN-plan-name.md",
+  "created": "YYYY-MM-DD",
+  "updated": "YYYY-MM-DD",
+  "tests": [
+    {
+      "id": "func-001",
+      "category": "functional",
+      "description": "[What this test verifies]",
+      "steps": ["[Step 1]", "[Step 2]"],
+      "passes": false
+    },
+    {
+      "id": "arch-001",
+      "category": "architecture",
+      "description": "Changes follow layered architecture and boundary validation",
+      "steps": [
+        "Run scripts/lint-architecture.sh — no new violations",
+        "Run scripts/lint-boundary-validation.sh — no new violations"
+      ],
+      "passes": false
+    }
+  ]
+}

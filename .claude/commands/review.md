@@ -15,7 +15,8 @@ Review all pending changes before committing.
 4. Run `./scripts/verify-tests-exist.sh` to verify test coverage
 5. Check if any changed files are public APIs — if so, verify docs are updated
 6. Verify commit message follows conventional commits format
-7. Report review findings:
+7. Run `./scripts/lint-progress.sh` — if progress is stale, tell the user to run `/progress` before pushing
+8. Report review findings:
    - Issues that must be fixed before commit
    - Warnings to consider
    - Confirmation if everything looks good

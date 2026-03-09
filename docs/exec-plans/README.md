@@ -53,14 +53,81 @@ See [TEMPLATE.md](./TEMPLATE.md) for the full template.
 Exec plans keep work transparent and recoverable. If an agent is interrupted,
 another agent (or a human) can pick up where it left off by reading the plan.
 
+## Verification Tests {#verification-tests}
+
+Each exec plan has a companion `.verify.json` file that provides structured,
+machine-parseable proof that acceptance criteria have been met. This replaces
+prose checkboxes, which are easily fudged by bulk-checking.
+
+### Why JSON Instead of Markdown Checkboxes?
+
+- JSON with `"passes": false` fields forces deliberate, per-test updates
+- The `evidence` field requires specific proof of what was verified
+- `lint-exec-plans.sh` can enforce that completed plans have all-passing tests
+- The verification file becomes a structured record of what was checked and how
+
+### Format
+
+```json
+{
+  "plan": "NNN-plan-name.md",
+  "created": "YYYY-MM-DD",
+  "updated": "YYYY-MM-DD",
+  "tests": [
+    {
+      "id": "func-001",
+      "category": "functional",
+      "description": "What this test verifies",
+      "steps": ["Step 1", "Step 2"],
+      "passes": false,
+      "evidence": "Required when passes is true"
+    }
+  ]
+}
+```
+
+**Fields:**
+- `plan` — Filename of the companion `.md` plan
+- `created` / `updated` — Date strings (YYYY-MM-DD)
+- `tests` — Array of test objects:
+  - `id` — Unique identifier (e.g., `func-001`, `arch-001`)
+  - `category` — One of: `functional`, `integration`, `edge-case`, `architecture`, `documentation`
+  - `description` — What the test verifies
+  - `steps` — Array of steps to execute
+  - `passes` — Boolean, starts as `false`
+  - `evidence` — String, required when `passes` is `true`
+
+### Lifecycle
+
+1. **Created with plan** — `/plan` generates both `.md` and `.verify.json`
+2. **Updated during work** — `/verify-plan` runs tests and records evidence
+3. **Enforced at completion** — `lint-exec-plans.sh` fails if completed plans have failing tests
+
+### Categories
+
+| Prefix | Category | What it verifies |
+|--------|----------|------------------|
+| `func-` | functional | Does the feature work correctly? |
+| `integ-` | integration | Do components work together? |
+| `edge-` | edge-case | Are boundary conditions handled? |
+| `arch-` | architecture | Do changes follow project structure rules? |
+| `doc-` | documentation | Are docs updated to match changes? |
+
+See [VERIFY_TEMPLATE.json](./VERIFY_TEMPLATE.json) for the template.
+
 ## Directory Structure
 
 ```
 exec-plans/
-├── README.md          # This file
-├── TEMPLATE.md        # Template for new plans
-├── active/            # Plans currently being executed
+├── README.md              # This file
+├── TEMPLATE.md            # Template for new plans
+├── VERIFY_TEMPLATE.json   # Template for verification files
+├── active/                # Plans currently being executed
+│   ├── NNN-name.md        # Exec plan
+│   ├── NNN-name.verify.json  # Companion verification tests
 │   └── .gitkeep
-└── completed/         # Finished plans (historical record)
+└── completed/             # Finished plans (historical record)
+    ├── NNN-name.md
+    ├── NNN-name.verify.json
     └── .gitkeep
 ```

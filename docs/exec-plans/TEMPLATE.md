@@ -17,6 +17,10 @@ owner: "[name or agent]"
 - [ ] Step 3: [description]
 
 ## Acceptance Criteria
+
+> Each criterion should map to at least one test in the companion
+> `.verify.json` file. Run `/verify-plan` to validate.
+
 - [criterion 1]
 - [criterion 2]
 

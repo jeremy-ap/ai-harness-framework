@@ -33,6 +33,7 @@
 @docs/LAYERS.md
 @docs/TESTING.md
 @docs/SECURITY.md
+@docs/PROGRESS.md
 @.claude/rules/architecture-boundaries.md
 @.claude/rules/commit-conventions.md
 
@@ -43,11 +44,13 @@
 - Never swallow errors silently
 
 ## Workflow
-1. Check for active exec-plan in @docs/exec-plans/active/
-2. Make changes in small, testable increments
-3. Run tests after each change
-4. Update docs if public API changes
-5. Run `./scripts/harness-doctor.sh` before final commit
+1. Read `docs/PROGRESS.md` for recent project history
+2. Check for active exec-plan in @docs/exec-plans/active/
+3. Make changes in small, testable increments
+4. Run tests after each change
+5. Update docs if public API changes
+6. Run `./scripts/harness-doctor.sh` before final commit
+7. For significant work, update progress log (`/progress`)
 
 ## Git Conventions
 - Commit messages: `type(scope): description` (conventional commits)

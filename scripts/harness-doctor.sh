@@ -78,6 +78,7 @@ run_check "Boundary Validation"  "$SCRIPT_DIR/lint-boundary-validation.sh"  "$ci
 run_check "Documentation"          "$SCRIPT_DIR/lint-docs.sh"             "$ci_flag"
 run_check "Test Existence"         "$SCRIPT_DIR/verify-tests-exist.sh"    "$ci_flag"
 run_check "Exec Plans"             "$SCRIPT_DIR/lint-exec-plans.sh"       "$ci_flag"
+run_check "Progress Log"           "$SCRIPT_DIR/lint-progress.sh"        "$ci_flag"
 run_check "Commit Messages"        "$SCRIPT_DIR/lint-commit-messages.sh"  "$ci_flag"
 
 # --- Unified summary ---

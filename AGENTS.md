@@ -80,6 +80,7 @@ This checklist is mandatory. Skipping verification leads to broken builds, silen
 - Never force-push to main/master
 
 ## Workflow
+0. Read `docs/PROGRESS.md` for recent project history and current state
 1. Read `docs/exec-plans/active/` for any active execution plan
 2. Understand the relevant code before making changes
 3. Make changes in small, testable increments
@@ -87,3 +88,4 @@ This checklist is mandatory. Skipping verification leads to broken builds, silen
 5. Run the full verification checklist before final commit
 6. Update documentation if public API changes
 7. Run `./scripts/harness-doctor.sh` as a final sanity check
+8. For significant work, update the progress log (`/progress` in Claude Code, or manually edit `docs/PROGRESS.md`)

@@ -130,6 +130,22 @@ Ask the user:
 
 Apply to listed files.
 
+## Phase 5b: Initialize Progress Log
+
+**Creates:** docs/PROGRESS.md
+
+After completing the previous phases, create the initial progress log entry:
+
+1. Open `docs/PROGRESS.md`
+2. Replace `{{PROJECT_STATE}}` with "Initial setup complete"
+3. Replace all `{{DATE}}` placeholders with today's date (YYYY-MM-DD format)
+4. Update the initial log entry to reflect what was configured:
+   - Project name and stack detected
+   - Domains configured in architecture.json
+   - Which phases were completed
+
+This establishes the first progress entry, recording project setup as the starting point.
+
 ## Phase 6: Deep Documentation (offer to skip)
 
 **Fills:** docs/DESIGN.md (remaining), docs/SECURITY.md, docs/RELIABILITY.md, docs/design-docs/000-core-beliefs.md (beliefs)

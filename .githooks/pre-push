@@ -41,6 +41,17 @@ else
   echo "[HARNESS] Warning: lint-boundary-validation.sh not found. Skipping boundary validation."
 fi
 
+# Check progress log staleness
+if [[ -f "$REPO_ROOT/scripts/lint-progress.sh" ]]; then
+  echo ""
+  echo "--- Checking progress log ---"
+  if ! "$REPO_ROOT/scripts/lint-progress.sh"; then
+    FAILED=1
+  fi
+else
+  echo "[HARNESS] Warning: lint-progress.sh not found. Skipping progress check."
+fi
+
 if [[ $FAILED -ne 0 ]]; then
   echo ""
   echo "[HARNESS] Pre-push checks failed. Fix the issues above before pushing."
